@@ -5,34 +5,42 @@ export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code')
   const origin = request.nextUrl.origin
 
-  const response = NextResponse.redirect(`${origin}/`)
-
-  if (code) {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            // NextRequest なので request.cookies が使える
-            return request.cookies.getAll()
-          },
-          setAll(cookiesToSet) {
-            // リダイレクトレスポンスに直接 Set-Cookie を付与
-            cookiesToSet.forEach(({ name, value, options }) => {
-              response.cookies.set(name, value, options)
-            })
-          },
-        },
-      }
-    )
-
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (error) {
-      console.error('[auth/callback] exchangeCodeForSession error:', error.message)
-      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
-    }
+  if (!code) {
+    return NextResponse.redirect(`${origin}/login?error=missing_code`)
   }
 
-  return response
+  // cookie を収集するための一時レスポンス（exchangeCodeForSession が setAll を呼ぶ）
+  const cookieResponse = NextResponse.next()
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code)
+  if (error) {
+    console.error('[auth/callback] exchangeCodeForSession error:', error.message)
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
+  }
+
+  // セッション cookie をリダイレクトレスポンスにコピー
+  const redirectResponse = NextResponse.redirect(`${origin}/`)
+  cookieResponse.cookies.getAll().forEach((cookie) => {
+    redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+  })
+
+  return redirectResponse
 }
