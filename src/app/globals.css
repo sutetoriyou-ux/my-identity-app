@@ -1,26 +1,62 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --base:      #F5F3F0;
+  --card:      #EBEBEB;
+  --ink:       #2D2D2D;
+  --soft:      #6B6B6B;
+  --faint:     #9A9A9A;
+  --rim:       #D8D5D0;
+  --terra:     #C17F6B;
+  --terra-dk:  #A96B59;
+  --sage:      #7A9E7E;
+  --sage-dk:   #5F8463;
+  --warn:      #B5845A;
+  --warn-bg:   #F0E8DF;
+  --err:       #B05555;
+  --err-bg:    #F0E0E0;
+  --ok:        #5F8463;
+  --ok-bg:     #E2EDE2;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-base:     var(--base);
+  --color-card:     var(--card);
+  --color-ink:      var(--ink);
+  --color-soft:     var(--soft);
+  --color-faint:    var(--faint);
+  --color-rim:      var(--rim);
+  --color-terra:    var(--terra);
+  --color-terra-dk: var(--terra-dk);
+  --color-sage:     var(--sage);
+  --color-sage-dk:  var(--sage-dk);
+  --color-warn:     var(--warn);
+  --color-warn-bg:  var(--warn-bg);
+  --color-err:      var(--err);
+  --color-err-bg:   var(--err-bg);
+  --color-ok:       var(--ok);
+  --color-ok-bg:    var(--ok-bg);
+  --font-sans:      var(--font-geist-sans);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--base);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+::selection {
+  background-color: var(--terra);
+  color: #fff;
+}
+
+/* フラットスクロールバー */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--base); }
+::-webkit-scrollbar-thumb { background: var(--rim); }
